@@ -406,142 +406,195 @@
                     return;
                 }
 
+                // Verificar que jsPDF esté disponible
+                if (typeof window.jspdf === 'undefined') {
+                    this.showAlert('Error: Biblioteca PDF no cargada. Intente recargar la página.');
+                    return;
+                }
+
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                // Configuración de fuentes y tamaños
+                // Asegurar que los datos estén actualizados
+                this.saveData();
+                
+                // Configuración de página
                 const pageWidth = doc.internal.pageSize.width;
+                const pageHeight = doc.internal.pageSize.height;
                 const margin = 15;
-                const lineHeight = 5;
                 let currentY = 20;
 
-                // Header de la institución
-                doc.setFontSize(12);
+                // ENCABEZADO CON LOGOS
+                // Logo izquierdo (Ministerio de Educación) - simular espacio
+                doc.setFontSize(8);
                 doc.setFont(undefined, 'bold');
-                doc.text('UNIDAD EDUCATIVA "LUIS ULPIANO DE LA TORRE"', pageWidth/2, currentY, { align: 'center' });
-                currentY += lineHeight;
-                
-                doc.setFontSize(9);
+                doc.text('Ministerio de Educación', margin, currentY);
+                currentY += 3;
                 doc.setFont(undefined, 'normal');
-                doc.text('Circuito: 05D02C02_03 / Código AMIE: 05H00284', pageWidth/2, currentY, { align: 'center' });
-                currentY += lineHeight;
-                doc.text('Correo electrónico: ueluisulpianodelatorre@hotmail.com', pageWidth/2, currentY, { align: 'center' });
-                currentY += lineHeight;
-                doc.text('San Pedro-La Maná – Cotopaxi – Ecuador', pageWidth/2, currentY, { align: 'center' });
-                currentY += lineHeight * 2;
-
-                // Título del documento
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'bold');
-                const title = 'PLAN DE TRABAJO E INFORME DE ACTIVIDADES CUMPLIDAS FUERA DE\nLOS 25 PERIODOS PEDAGÓGICOS DEL DOCENTE.';
-                const titleLines = doc.splitTextToSize(title, pageWidth - 2 * margin);
-                titleLines.forEach(line => {
-                    doc.text(line, pageWidth/2, currentY, { align: 'center' });
-                    currentY += lineHeight;
-                });
+                doc.text('República del Ecuador', margin, currentY);
                 
-                currentY += lineHeight;
+                // Logo derecho (Institución) - simular espacio
+                doc.setFont(undefined, 'bold');
+                doc.text('UNIDAD EDUCATIVA', pageWidth - margin - 40, 20);
+                doc.text('"LUIS ULPIANO DE LA TORRE"', pageWidth - margin - 45, 23);
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(7);
+                doc.text('Circuito: 05D02C02_03 / Código AMIE: 05H00284', pageWidth - margin - 50, 26);
+                doc.text('Correo electrónico: ueluisulpianodelatorre@hotmail.com', pageWidth - margin - 55, 29);
+                doc.text('San Pedro-La Maná – Cotopaxi – Ecuador', pageWidth - margin - 45, 32);
+
+                currentY = 45;
+
+                // TÍTULO PRINCIPAL
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                doc.text('PLAN DE TRABAJO E INFORME DE ACTIVIDADES CUMPLIDAS FUERA DE', pageWidth/2, currentY, { align: 'center' });
+                currentY += 5;
+                doc.text('LOS 25 PERIODOS PEDAGÓGICOS DEL DOCENTE.', pageWidth/2, currentY, { align: 'center' });
+                currentY += 5;
                 doc.text('Art. 263 REGLAMENTO GENERAL A LA LOEI', pageWidth/2, currentY, { align: 'center' });
-                currentY += lineHeight * 2;
+                currentY += 10;
 
-                // Información del docente
+                // INFORMACIÓN DEL DOCENTE
                 doc.setFontSize(9);
-                doc.setFont(undefined, 'normal');
+                doc.setFont(undefined, 'bold');
                 const fechaInicio = this.formatDate(this.currentData.fechaInicio);
                 const fechaFin = this.formatDate(this.currentData.fechaFin);
                 
                 doc.text(`DOCENTE: ${this.currentData.docente}`, margin, currentY);
-                doc.text(`TUTORIA: ${this.currentData.tutoria}`, pageWidth/2, currentY);
-                currentY += lineHeight;
-                
-                doc.text(`AÑO LECTIVO: ${this.currentData.anoLectivo}`, margin, currentY);
-                currentY += lineHeight * 2;
+                doc.text(`AÑO LECTIVO: ${this.currentData.anoLectivo}`, pageWidth - margin - 60, currentY);
+                currentY += 6;
                 
                 doc.text(`SEMANA ${this.currentData.numeroSemana}: Del ${fechaInicio} al ${fechaFin}`, margin, currentY);
-                doc.text(`ASIGNATURAS: ${this.currentData.asignaturas}`, margin, currentY + lineHeight);
-                currentY += lineHeight * 3;
+                currentY += 6;
+                doc.text(`ASIGNATURAS: ${this.currentData.asignaturas}`, margin, currentY);
+                currentY += 15;
 
-                // Tabla de actividades
+                // TABLA CON BORDES
+                const tableStartY = currentY;
+                const colWidths = [15, 25, 35, 105]; // Anchos de columnas
+                const rowHeight = 12;
+                
+                // Posiciones X de las columnas
+                const col1X = margin;
+                const col2X = col1X + colWidths[0];
+                const col3X = col2X + colWidths[1];
+                const col4X = col3X + colWidths[2];
+                const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+
+                // ENCABEZADO DE TABLA
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                
+                // Dibujar rectángulos para el encabezado
+                doc.rect(col1X, currentY, colWidths[0], rowHeight);
+                doc.rect(col2X, currentY, colWidths[1], rowHeight);
+                doc.rect(col3X, currentY, colWidths[2], rowHeight);
+                doc.rect(col4X, currentY, colWidths[3], rowHeight);
+                
+                // Texto del encabezado
+                doc.text('DIA', col1X + 5, currentY + 8);
+                doc.text('GESTION', col2X + 3, currentY + 8);
+                doc.text('ACTIVIDADES', col3X + 8, currentY + 8);
+                
+                currentY += rowHeight;
+
+                // CONTENIDO DE LA TABLA
+                doc.setFont(undefined, 'normal');
                 doc.setFontSize(8);
                 
-                // Headers de la tabla
-                doc.setFont(undefined, 'bold');
-                doc.text('N°', margin + 5, currentY);
-                doc.text('DÍA', margin + 15, currentY);
-                doc.text('GESTIÓN', margin + 45, currentY);
-                doc.text('ACTIVIDADES', margin + 80, currentY);
-                currentY += lineHeight;
-
-                // Línea separadora
-                doc.line(margin, currentY - 2, pageWidth - margin, currentY - 2);
-                currentY += 2;
-
-                // Contenido de la tabla
-                doc.setFont(undefined, 'normal');
                 this.dias.forEach((dia, index) => {
                     const diaKey = dia.toLowerCase();
                     const actividadData = this.currentData.actividades?.[diaKey] || {};
                     
-                    const startY = currentY;
-                    
-                    // Número del día
-                    doc.text((index + 1).toString(), margin + 5, currentY);
-                    
-                    // Día de la semana
-                    doc.text(dia, margin + 15, currentY);
-                    
-                    // Gestión Individual
-                    doc.text('INDIVIDUAL', margin + 45, currentY);
-                    
-                    // Actividades individuales
                     const individualText = actividadData.individual || '';
-                    const individualLines = doc.splitTextToSize(individualText, 100);
-                    individualLines.forEach((line, lineIndex) => {
-                        if (line.trim()) {
-                            doc.text(`• ${line}`, margin + 80, currentY + (lineIndex * 3));
-                        }
-                    });
-                    
-                    currentY += Math.max(individualLines.length * 3, 5);
-                    
-                    // Gestión Participativa
-                    doc.text('PARTICIPATIVA', margin + 45, currentY);
-                    
-                    // Actividades participativas
                     const participativaText = actividadData.participativa || '';
-                    const participativaLines = doc.splitTextToSize(participativaText, 100);
-                    participativaLines.forEach((line, lineIndex) => {
-                        if (line.trim()) {
-                            doc.text(`• ${line}`, margin + 80, currentY + (lineIndex * 3));
-                        }
-                    });
                     
-                    currentY += Math.max(participativaLines.length * 3, 5) + 5;
+                    // Calcular altura necesaria para las actividades
+                    const individualLines = doc.splitTextToSize(individualText, colWidths[3] - 4);
+                    const participativaLines = doc.splitTextToSize(participativaText, colWidths[3] - 4);
+                    const totalLines = individualLines.length + participativaLines.length + 1; // +1 para espacio
+                    const cellHeight = Math.max(rowHeight * 2, totalLines * 3 + 4);
                     
                     // Verificar si necesitamos nueva página
-                    if (currentY > 250) {
+                    if (currentY + cellHeight > pageHeight - 60) {
                         doc.addPage();
-                        currentY = 20;
+                        currentY = 30;
                     }
+                    
+                    // Dibujar bordes de las celdas
+                    doc.rect(col1X, currentY, colWidths[0], cellHeight);
+                    doc.rect(col2X, currentY, colWidths[1], cellHeight);
+                    doc.rect(col3X, currentY, colWidths[2], cellHeight);
+                    doc.rect(col4X, currentY, colWidths[3], cellHeight);
+                    
+                    // Contenido de las celdas
+                    doc.setFont(undefined, 'bold');
+                    doc.text((index + 1).toString(), col1X + 6, currentY + 8);
+                    doc.text(dia, col1X + 2, currentY + 16);
+                    
+                    // Gestión Individual
+                    doc.text('INDIVIDUAL', col2X + 2, currentY + 8);
+                    doc.text('PARTICIPATIVA', col2X + 2, currentY + cellHeight/2 + 4);
+                    
+                    // Actividades
+                    doc.setFont(undefined, 'normal');
+                    let textY = currentY + 8;
+                    
+                    // Actividades individuales
+                    individualLines.forEach(line => {
+                        if (line.trim()) {
+                            doc.text(`• ${line}`, col4X + 2, textY);
+                            textY += 3;
+                        }
+                    });
+                    
+                    textY = currentY + cellHeight/2 + 4;
+                    
+                    // Actividades participativas
+                    participativaLines.forEach(line => {
+                        if (line.trim()) {
+                            doc.text(`• ${line}`, col4X + 2, textY);
+                            textY += 3;
+                        }
+                    });
+                    
+                    currentY += cellHeight;
                 });
 
-                // Firmas
-                currentY += 15;
+                // FIRMAS
+                currentY += 20;
                 doc.setFont(undefined, 'normal');
-                doc.text('_______________________', margin + 20, currentY);
-                doc.text('_____________________', pageWidth - margin - 60, currentY);
-                currentY += lineHeight;
-                doc.text('Lic. Tamara Fuentes', margin + 30, currentY);
-                doc.text(this.currentData.docente, pageWidth - margin - 50, currentY);
-                currentY += lineHeight;
-                doc.text('Rector/e', margin + 40, currentY);
-                doc.text('Docente', pageWidth - margin - 35, currentY);
+                doc.setFontSize(9);
+                
+                // Líneas para firmas
+                doc.line(margin + 10, currentY, margin + 60, currentY);
+                doc.line(pageWidth - margin - 60, currentY, pageWidth - margin - 10, currentY);
+                
+                currentY += 5;
+                doc.text('Lic. Tamara Fuentes', margin + 25, currentY);
+                doc.text(this.currentData.docente, pageWidth - margin - 45, currentY);
+                
+                currentY += 4;
+                doc.text('Rector/e', margin + 35, currentY);
+                doc.text('Docente', pageWidth - margin - 25, currentY);
+
+                // FOOTER - Logo Ecuador
+                const footerY = pageHeight - 30;
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('ECUADOR', pageWidth/2, footerY, { align: 'center' });
+                
+                // Simular las franjas de colores con texto
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'normal');
+                doc.text('●●●', pageWidth/2 - 15, footerY + 3, { align: 'center' });
 
                 // Guardar el PDF
                 const fileName = `Horas_Complementarias_Semana_${this.currentData.numeroSemana}_${this.currentData.docente.replace(/\s+/g, '_')}.pdf`;
                 doc.save(fileName);
 
-                this.showAlert('PDF generado exitosamente.');
+                this.showAlert('PDF generado exitosamente con el formato oficial.');
             }
 
             showConfirm(message, onConfirm) {

@@ -514,23 +514,34 @@
                     
                     const individualCellHeight = Math.max(rowHeight, individualLines.length * 3 + 6);
                     const participativaCellHeight = Math.max(rowHeight, participativaLines.length * 3 + 6);
+                    const totalCellHeight = individualCellHeight + participativaCellHeight;
                     
                     // Verificar si necesitamos nueva página
-                    if (currentY + individualCellHeight + participativaCellHeight > pageHeight - 50) {
+                    if (currentY + totalCellHeight > pageHeight - 50) {
                         doc.addPage();
                         currentY = 30;
                     }
                     
+                    // DIBUJAR BORDES COMBINADOS PARA EL DÍA
+                    // Columna N° y DÍA combinadas verticalmente para ambas filas
+                    doc.rect(col1X, currentY, colWidths[0], totalCellHeight);
+                    doc.rect(col2X, currentY, colWidths[1], totalCellHeight);
+                    
                     // FILA INDIVIDUAL
-                    doc.rect(col1X, currentY, colWidths[0], individualCellHeight);
-                    doc.rect(col2X, currentY, colWidths[1], individualCellHeight);
                     doc.rect(col3X, currentY, colWidths[2], individualCellHeight);
                     doc.rect(col4X, currentY, colWidths[3], individualCellHeight);
                     
-                    // Contenido fila individual
+                    // FILA PARTICIPATIVA
+                    doc.rect(col3X, currentY + individualCellHeight, colWidths[2], participativaCellHeight);
+                    doc.rect(col4X, currentY + individualCellHeight, colWidths[3], participativaCellHeight);
+                    
+                    // CONTENIDO DE LAS CELDAS COMBINADAS
                     doc.setFont(undefined, 'bold');
-                    doc.text((index + 1).toString(), col1X + colWidths[0]/2, currentY + individualCellHeight/2 + 1, { align: 'center' });
-                    doc.text(dia, col2X + colWidths[1]/2, currentY + individualCellHeight/2 + 1, { align: 'center' });
+                    // Número y día centrados en el espacio total
+                    doc.text((index + 1).toString(), col1X + colWidths[0]/2, currentY + totalCellHeight/2 + 1, { align: 'center' });
+                    doc.text(dia, col2X + colWidths[1]/2, currentY + totalCellHeight/2 + 1, { align: 'center' });
+                    
+                    // GESTIÓN INDIVIDUAL
                     doc.text('INDIVIDUAL', col3X + colWidths[2]/2, currentY + individualCellHeight/2 + 1, { align: 'center' });
                     
                     // Actividades individuales
@@ -543,21 +554,13 @@
                         }
                     });
                     
-                    currentY += individualCellHeight;
-                    
-                    // FILA PARTICIPATIVA
-                    doc.rect(col1X, currentY, colWidths[0], participativaCellHeight);
-                    doc.rect(col2X, currentY, colWidths[1], participativaCellHeight);
-                    doc.rect(col3X, currentY, colWidths[2], participativaCellHeight);
-                    doc.rect(col4X, currentY, colWidths[3], participativaCellHeight);
-                    
-                    // Contenido fila participativa
+                    // GESTIÓN PARTICIPATIVA
                     doc.setFont(undefined, 'bold');
-                    doc.text('PARTICIPATIVA', col3X + colWidths[2]/2, currentY + participativaCellHeight/2 + 1, { align: 'center' });
+                    doc.text('PARTICIPATIVA', col3X + colWidths[2]/2, currentY + individualCellHeight + participativaCellHeight/2 + 1, { align: 'center' });
                     
                     // Actividades participativas
                     doc.setFont(undefined, 'normal');
-                    textY = currentY + 5;
+                    textY = currentY + individualCellHeight + 5;
                     participativaLines.forEach(line => {
                         if (line.trim()) {
                             doc.text(`• ${line}`, col4X + 2, textY);
@@ -565,7 +568,7 @@
                         }
                     });
                     
-                    currentY += participativaCellHeight;
+                    currentY += totalCellHeight;
                 });
 
                 // FIRMAS

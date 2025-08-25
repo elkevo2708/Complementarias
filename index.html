@@ -432,15 +432,15 @@
                 doc.setFont(undefined, 'normal');
                 doc.text('República del Ecuador', margin, currentY);
                 
-                // Logo derecho (Institución)
+                // Logo centrado (Institución)
                 doc.setFont(undefined, 'bold');
-                doc.text('UNIDAD EDUCATIVA', pageWidth - margin - 40, 15);
-                doc.text('"LUIS ULPIANO DE LA TORRE"', pageWidth - margin - 45, 18);
+                doc.text('UNIDAD EDUCATIVA', pageWidth/2, 15, { align: 'center' });
+                doc.text('"LUIS ULPIANO DE LA TORRE"', pageWidth/2, 18, { align: 'center' });
                 doc.setFont(undefined, 'normal');
                 doc.setFontSize(7);
-                doc.text('Circuito: 05D02C02_03 / Código AMIE: 05H00284', pageWidth - margin - 50, 21);
-                doc.text('Correo electrónico: ueluisulpianodelatorre@hotmail.com', pageWidth - margin - 65, 24);
-                doc.text('San Pedro-La Maná – Cotopaxi – Ecuador', pageWidth - margin - 45, 27);
+                doc.text('Circuito: 05D02C02_03 / Código AMIE: 05H00284', pageWidth/2, 21, { align: 'center' });
+                doc.text('Correo electrónico: ueluisulpianodelatorre@hotmail.com', pageWidth/2, 24, { align: 'center' });
+                doc.text('San Pedro-La Maná – Cotopaxi – Ecuador', pageWidth/2, 27, { align: 'center' });
 
                 currentY = 40;
 
